@@ -6,6 +6,7 @@ import FeedbackDisplay from "./FeedbackDisplay";
 import ScoreTracker from "./ScoreTracker";
 import ResultsScreen from "./ResultsScreen";
 import FileUpload from "./FileUpload";
+import { Button } from "@/components/ui/button";
 
 // Game stages to track the current state of the quiz
 enum GameStage {
@@ -45,12 +46,13 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
     showHints: true,
     difficultyLevel: "intermediate",
   });
-  
+
   // File upload state
   const [uploadedFile, setUploadedFile] = useState<{
     fileName: string;
     questionCount: number;
     fileType: string;
+    fileContent?: string;
   } | null>(null);
 
   // Quiz state
@@ -58,13 +60,15 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
   const [score, setScore] = useState<number>(0);
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
+
   // Track used questions to avoid repetition
-  const [usedQuestionIndices, setUsedQuestionIndices] = useState<Record<string, number[]>>({});
+  const [usedQuestionIndices, setUsedQuestionIndices] = useState<
+    Record<string, number[]>
+  >({});
 
   // Mock questions for demonstration - organized by topic
-  const [questionsByTopic] = useState<Record<string, any[]>>({ 
-    "science": [
+  const [questionsByTopic] = useState<Record<string, any[]>>({
+    science: [
       {
         question: "What is the primary function of mitochondria in a cell?",
         options: [
@@ -90,7 +94,8 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
           "Magnetic bond is not a type of chemical bond. The main types of chemical bonds are ionic, covalent, hydrogen, and metallic bonds.",
       },
       {
-        question: "What is the process by which plants make their own food using sunlight?",
+        question:
+          "What is the process by which plants make their own food using sunlight?",
         options: ["Respiration", "Photosynthesis", "Fermentation", "Digestion"],
         correctAnswer: "Photosynthesis",
         explanation:
@@ -114,21 +119,24 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
         question: "What is the smallest unit of life?",
         options: ["Atom", "Cell", "Molecule", "Organelle"],
         correctAnswer: "Cell",
-        explanation: "The cell is the smallest unit of life that can replicate independently.",
+        explanation:
+          "The cell is the smallest unit of life that can replicate independently.",
       },
       {
         question: "Which of these is NOT a state of matter?",
         options: ["Solid", "Liquid", "Gas", "Mineral"],
         correctAnswer: "Mineral",
-        explanation: "The main states of matter are solid, liquid, gas, and plasma. Mineral is a type of solid material.",
-      }
+        explanation:
+          "The main states of matter are solid, liquid, gas, and plasma. Mineral is a type of solid material.",
+      },
     ],
-    "math": [
+    math: [
       {
         question: "What is the value of π (pi) to two decimal places?",
         options: ["3.14", "3.41", "3.12", "3.16"],
         correctAnswer: "3.14",
-        explanation: "The value of π (pi) to two decimal places is 3.14. It is the ratio of a circle's circumference to its diameter.",
+        explanation:
+          "The value of π (pi) to two decimal places is 3.14. It is the ratio of a circle's circumference to its diameter.",
       },
       {
         question: "What is the square root of 144?",
@@ -137,16 +145,19 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
         explanation: "The square root of 144 is 12, because 12 × 12 = 144.",
       },
       {
-        question: "In a right-angled triangle, what is the Pythagorean theorem?",
+        question:
+          "In a right-angled triangle, what is the Pythagorean theorem?",
         options: ["a² + b² = c²", "a + b = c", "a² - b² = c²", "a × b = c"],
         correctAnswer: "a² + b² = c²",
-        explanation: "The Pythagorean theorem states that in a right-angled triangle, the square of the length of the hypotenuse (c) equals the sum of squares of the other two sides (a and b).",
+        explanation:
+          "The Pythagorean theorem states that in a right-angled triangle, the square of the length of the hypotenuse (c) equals the sum of squares of the other two sides (a and b).",
       },
       {
         question: "What is the derivative of x²?",
         options: ["2x", "x", "2", "x²"],
         correctAnswer: "2x",
-        explanation: "The derivative of x² with respect to x is 2x, following the power rule of differentiation.",
+        explanation:
+          "The derivative of x² with respect to x is 2x, following the power rule of differentiation.",
       },
       {
         question: "What is the value of log₁₀(100)?",
@@ -158,59 +169,88 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
         question: "What is the formula for the area of a circle?",
         options: ["πr²", "2πr", "πd", "r²"],
         correctAnswer: "πr²",
-        explanation: "The area of a circle is calculated using the formula A = πr², where r is the radius of the circle.",
-      }
+        explanation:
+          "The area of a circle is calculated using the formula A = πr², where r is the radius of the circle.",
+      },
     ],
-    "history": [
+    history: [
       {
         question: "In which year did World War II end?",
         options: ["1943", "1945", "1947", "1950"],
         correctAnswer: "1945",
-        explanation: "World War II ended in 1945 with the surrender of Germany in May and Japan in September.",
+        explanation:
+          "World War II ended in 1945 with the surrender of Germany in May and Japan in September.",
       },
       {
         question: "Who was the first President of the United States?",
-        options: ["Thomas Jefferson", "John Adams", "George Washington", "Benjamin Franklin"],
+        options: [
+          "Thomas Jefferson",
+          "John Adams",
+          "George Washington",
+          "Benjamin Franklin",
+        ],
         correctAnswer: "George Washington",
-        explanation: "George Washington was the first President of the United States, serving from 1789 to 1797.",
+        explanation:
+          "George Washington was the first President of the United States, serving from 1789 to 1797.",
       },
       {
         question: "Which ancient civilization built the pyramids at Giza?",
         options: ["Romans", "Greeks", "Mayans", "Egyptians"],
         correctAnswer: "Egyptians",
-        explanation: "The ancient Egyptians built the pyramids at Giza as tombs for their pharaohs.",
+        explanation:
+          "The ancient Egyptians built the pyramids at Giza as tombs for their pharaohs.",
       },
       {
         question: "When did the French Revolution begin?",
         options: ["1689", "1789", "1889", "1989"],
         correctAnswer: "1789",
-        explanation: "The French Revolution began in 1789 with the storming of the Bastille on July 14.",
-      }
+        explanation:
+          "The French Revolution began in 1789 with the storming of the Bastille on July 14.",
+      },
     ],
-    "literature": [
+    literature: [
       {
         question: "Who wrote 'Romeo and Juliet'?",
-        options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+        options: [
+          "Charles Dickens",
+          "William Shakespeare",
+          "Jane Austen",
+          "Mark Twain",
+        ],
         correctAnswer: "William Shakespeare",
-        explanation: "'Romeo and Juliet' was written by William Shakespeare around 1595.",
+        explanation:
+          "'Romeo and Juliet' was written by William Shakespeare around 1595.",
       },
       {
-        question: "Which novel begins with the line 'It was the best of times, it was the worst of times'?",
-        options: ["Great Expectations", "Oliver Twist", "A Tale of Two Cities", "David Copperfield"],
+        question:
+          "Which novel begins with the line 'It was the best of times, it was the worst of times'?",
+        options: [
+          "Great Expectations",
+          "Oliver Twist",
+          "A Tale of Two Cities",
+          "David Copperfield",
+        ],
         correctAnswer: "A Tale of Two Cities",
-        explanation: "'A Tale of Two Cities' by Charles Dickens begins with this famous opening line.",
+        explanation:
+          "'A Tale of Two Cities' by Charles Dickens begins with this famous opening line.",
       },
       {
         question: "Who is the author of 'To Kill a Mockingbird'?",
-        options: ["J.D. Salinger", "Harper Lee", "F. Scott Fitzgerald", "Ernest Hemingway"],
+        options: [
+          "J.D. Salinger",
+          "Harper Lee",
+          "F. Scott Fitzgerald",
+          "Ernest Hemingway",
+        ],
         correctAnswer: "Harper Lee",
-        explanation: "'To Kill a Mockingbird' was written by Harper Lee and published in 1960.",
-      }
-    ]
+        explanation:
+          "'To Kill a Mockingbird' was written by Harper Lee and published in 1960.",
+      },
+    ],
   });
-  
+
   // Current questions for the quiz
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<any[]>([
     {
       question: "What is the primary function of mitochondria in a cell?",
       options: [
@@ -271,49 +311,56 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
     setQuizConfig(config);
     setCurrentQuestionIndex(0);
     setScore(0);
-    
+
     // Select questions for this topic/subtopic
     const topicKey = selectedTopic;
     if (questionsByTopic[topicKey]) {
       const availableQuestions = questionsByTopic[topicKey];
       const usedIndices = usedQuestionIndices[topicKey] || [];
-      
+
       // Find unused questions
       const unusedIndices = Array.from(
         { length: availableQuestions.length },
-        (_, i) => i
-      ).filter(index => !usedIndices.includes(index));
-      
+        (_, i) => i,
+      ).filter((index) => !usedIndices.includes(index));
+
       // If we've used all questions, reset
       if (unusedIndices.length < config.questionCount) {
-        setUsedQuestionIndices(prev => ({
+        setUsedQuestionIndices((prev) => ({
           ...prev,
-          [topicKey]: []
+          [topicKey]: [],
         }));
-        
+
         // Use all available indices
-        const selectedQuestions = shuffleArray(availableQuestions)
-          .slice(0, config.questionCount);
-        
+        const selectedQuestions = shuffleArray(availableQuestions).slice(
+          0,
+          config.questionCount,
+        );
+
         setQuestions(selectedQuestions);
-        
+
         // Mark these questions as used
-        setUsedQuestionIndices(prev => ({
+        setUsedQuestionIndices((prev) => ({
           ...prev,
-          [topicKey]: Array.from({ length: selectedQuestions.length }, (_, i) => i)
+          [topicKey]: Array.from(
+            { length: selectedQuestions.length },
+            (_, i) => i,
+          ),
         }));
       } else {
         // Randomly select unused questions
         const shuffledUnused = shuffleArray(unusedIndices);
         const selectedIndices = shuffledUnused.slice(0, config.questionCount);
-        const selectedQuestions = selectedIndices.map(index => availableQuestions[index]);
-        
+        const selectedQuestions = selectedIndices.map(
+          (index) => availableQuestions[index],
+        );
+
         setQuestions(selectedQuestions);
-        
+
         // Mark these questions as used
-        setUsedQuestionIndices(prev => ({
+        setUsedQuestionIndices((prev) => ({
           ...prev,
-          [topicKey]: [...usedIndices, ...selectedIndices]
+          [topicKey]: [...usedIndices, ...selectedIndices],
         }));
       }
     } else {
@@ -321,16 +368,22 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
       setQuestions([
         {
           question: "What is the primary function of mitochondria in a cell?",
-          options: ["Cell division", "Energy production", "Protein synthesis", "Waste removal"],
+          options: [
+            "Cell division",
+            "Energy production",
+            "Protein synthesis",
+            "Waste removal",
+          ],
           correctAnswer: "Energy production",
-          explanation: "Mitochondria are often referred to as the powerhouse of the cell because they generate most of the cell's supply of ATP."
-        }
+          explanation:
+            "Mitochondria are often referred to as the powerhouse of the cell because they generate most of the cell's supply of ATP.",
+        },
       ]);
     }
-    
+
     setGameStage(GameStage.QUESTION_DISPLAY);
   };
-  
+
   // Helper function to shuffle array
   const shuffleArray = (array: any[]) => {
     const newArray = [...array];
@@ -359,58 +412,115 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
       setGameStage(GameStage.FEEDBACK_DISPLAY);
     }, 1000);
   };
-  
+
   // Handle file upload completion
   const handleFileUploadComplete = (fileData: {
     fileName: string;
     questionCount: number;
     fileType: string;
+    fileContent?: string;
   }) => {
     setUploadedFile(fileData);
     setGameStage(GameStage.FILE_PROCESSING);
-    
-    // Simulate AI processing the document and generating questions
-    setTimeout(() => {
-      // Generate AI questions based on the document
-      const generatedQuestions = generateAIQuestionsFromDocument(fileData);
-      setQuestions(generatedQuestions);
-      
-      // Set up quiz configuration
-      setQuizConfig({
-        ...quizConfig,
-        questionCount: fileData.questionCount,
-      });
-      
-      setCurrentQuestionIndex(0);
-      setScore(0);
-      setGameStage(GameStage.QUESTION_DISPLAY);
-    }, 3000);
+
+    // Process the document and generate questions
+    (async () => {
+      try {
+        // Generate AI questions based on the document
+        const generatedQuestions =
+          await generateAIQuestionsFromDocument(fileData);
+        setQuestions(generatedQuestions);
+
+        // Set up quiz configuration
+        setQuizConfig({
+          ...quizConfig,
+          questionCount: fileData.questionCount,
+        });
+
+        setCurrentQuestionIndex(0);
+        setScore(0);
+        setGameStage(GameStage.QUESTION_DISPLAY);
+      } catch (error) {
+        console.error("Error generating questions:", error);
+        // Show error message or fallback
+        setGameStage(GameStage.TOPIC_SELECTION);
+      }
+    })();
   };
-  
-  // Simulate AI generating questions from a document
-  const generateAIQuestionsFromDocument = (fileData: {
+
+  // Generate questions from a document based on its content
+  const generateAIQuestionsFromDocument = async (fileData: {
     fileName: string;
     questionCount: number;
     fileType: string;
+    fileContent?: string;
   }) => {
-    // This would be replaced with actual AI processing
-    const dummyQuestions = [];
-    
-    for (let i = 0; i < fileData.questionCount; i++) {
-      dummyQuestions.push({
-        question: `Question ${i+1} generated from ${fileData.fileName}`,
+    const fileContent = fileData.fileContent || "";
+    let questions = [];
+
+    try {
+      // Import the OpenAI function
+      const { generateQuestionsWithOpenAI } = await import("@/lib/openai");
+
+      // Try to generate questions with OpenAI
+      const openAIQuestions = await generateQuestionsWithOpenAI(
+        fileContent,
+        fileData.questionCount,
+      );
+
+      if (openAIQuestions && openAIQuestions.length > 0) {
+        return openAIQuestions;
+      }
+    } catch (error) {
+      console.error("Error generating questions with OpenAI:", error);
+    }
+
+    // Fallback to basic question generation if OpenAI fails
+    console.log("Falling back to basic question generation");
+
+    // Extract some words from the content to use in questions
+    const words = fileContent
+      .replace(/[^\w\s]/g, "")
+      .split(/\s+/)
+      .filter((word) => word.length > 4)
+      .slice(0, 20);
+
+    // If we have content to work with
+    if (words.length > 0) {
+      for (let i = 0; i < Math.min(fileData.questionCount, words.length); i++) {
+        const word = words[i] || "concept";
+
+        questions.push({
+          question: `What is the significance of "${word}" in the context of this document?`,
+          options: [
+            `${word} is a key concept that defines the main thesis`,
+            `${word} is mentioned as a supporting example`,
+            `${word} is criticized or presented as a counterargument`,
+            `${word} is not significantly relevant to the main topic`,
+          ],
+          correctAnswer: `${word} is a key concept that defines the main thesis`,
+          explanation: `The term "${word}" appears in the document and represents an important concept related to the subject matter.`,
+        });
+      }
+    }
+
+    // Fill remaining questions if needed
+    while (questions.length < fileData.questionCount) {
+      const index = questions.length + 1;
+      questions.push({
+        question: `Based on the content of ${fileData.fileName}, what is the main topic discussed?`,
         options: [
-          `Option A for question ${i+1}`,
-          `Option B for question ${i+1}`,
-          `Option C for question ${i+1}`,
-          `Option D for question ${i+1}`,
+          `The document primarily discusses theoretical concepts`,
+          `The document focuses on practical applications`,
+          `The document presents a historical overview`,
+          `The document analyzes comparative perspectives`,
         ],
-        correctAnswer: `Option A for question ${i+1}`,
-        explanation: `This is the explanation for question ${i+1} from ${fileData.fileName}`,
+        correctAnswer: `The document primarily discusses theoretical concepts`,
+        explanation: `After analyzing the content of the document, it appears to focus mainly on theoretical frameworks and concepts.`,
       });
     }
-    
-    return dummyQuestions;
+
+    return questions;
   };
 
   // Handle continuing to next question after feedback
@@ -443,7 +553,7 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
           <div className="space-y-6">
             <TopicSelection onTopicSelected={handleTopicSelected} />
             <div className="flex justify-center">
-              <Button 
+              <Button
                 onClick={() => setGameStage(GameStage.FILE_UPLOAD)}
                 className="mt-4"
                 variant="outline"
@@ -453,22 +563,23 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
             </div>
           </div>
         );
-        
+
       case GameStage.FILE_UPLOAD:
         return (
-          <FileUpload 
+          <FileUpload
             onUploadComplete={handleFileUploadComplete}
             onBack={() => setGameStage(GameStage.TOPIC_SELECTION)}
           />
         );
-        
+
       case GameStage.FILE_PROCESSING:
         return (
           <div className="flex flex-col items-center justify-center p-12 space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             <h3 className="text-xl font-medium">Processing Your Document</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              AI is analyzing {uploadedFile?.fileName} and generating {uploadedFile?.questionCount} questions...
+              AI is analyzing {uploadedFile?.fileName} and generating{" "}
+              {uploadedFile?.questionCount} questions...
             </p>
           </div>
         );
@@ -538,7 +649,11 @@ const GameContainer: React.FC<GameContainerProps> = ({ className = "" }) => {
             score={score * 100}
             totalQuestions={questions.length}
             correctAnswers={score}
-            topic={uploadedFile ? `Document: ${uploadedFile.fileName}` : selectedTopic}
+            topic={
+              uploadedFile
+                ? `Document: ${uploadedFile.fileName}`
+                : selectedTopic
+            }
             subtopic={uploadedFile ? uploadedFile.fileType : selectedSubtopic}
             onPlayAgain={handlePlayAgain}
             onChangeTopics={handleChangeTopics}

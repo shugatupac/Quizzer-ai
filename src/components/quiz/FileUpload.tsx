@@ -20,6 +20,7 @@ interface FileUploadProps {
     fileName: string;
     questionCount: number;
     fileType: string;
+    fileContent?: string;
   }) => void;
   onBack: () => void;
 }
@@ -69,24 +70,42 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     setIsUploading(true);
 
-    // Simulate file upload and processing
-    setTimeout(() => {
+    // In a real application, we would upload the file to a server here
+    // and process it with an AI model to extract content and generate questions
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      // This would be replaced with actual file processing and AI analysis
+      // For now, we're just simulating the process
+
+      setTimeout(() => {
+        setIsUploading(false);
+
+        // Get file extension
+        const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
+        let fileType = "document";
+
+        if (fileExtension === "pdf") fileType = "pdf";
+        else if (fileExtension === "epub") fileType = "epub";
+        else if (["doc", "docx"].includes(fileExtension)) fileType = "word";
+
+        onUploadComplete({
+          fileName: file.name,
+          questionCount,
+          fileType,
+          // Pass the file content to be used for question generation
+          fileContent: e.target?.result?.toString() || "",
+        });
+      }, 2000);
+    };
+
+    reader.onerror = () => {
       setIsUploading(false);
+      setError("Error reading file. Please try again.");
+    };
 
-      // Get file extension
-      const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
-      let fileType = "document";
-
-      if (fileExtension === "pdf") fileType = "pdf";
-      else if (fileExtension === "epub") fileType = "epub";
-      else if (["doc", "docx"].includes(fileExtension)) fileType = "word";
-
-      onUploadComplete({
-        fileName: file.name,
-        questionCount,
-        fileType,
-      });
-    }, 2000);
+    // Read the file as text (in a real app, we might use different methods based on file type)
+    reader.readAsText(file);
   };
 
   const getFileIcon = () => {
